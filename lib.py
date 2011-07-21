@@ -5,14 +5,18 @@ from StringIO import StringIO
 class GmailFilters:
 
   # 21 Jul 2011 : GWA : Support loading from a pre-exported filter set or from scratch.
+  
+  namespaces = {'atom' : 'http://www.w3.org/2005/Atom',
+                'apps' : 'http://schemas.google.com/apps/2006'}
 
   def __init__(self, string):
     if string != "":
       f = StringIO(string)
       self.tree = etree.parse(f)
-      name = self.feed.xpath("/feed/name")
-      id = self.feed.xpath("/feed/id")
-      updated = self.feed.xpath("/feed/updated")
+      self.feed = self.tree.xpath('/atom:feed', namespaces=GmailFilters.namespaces)[0]
+      title = self.tree.xpath('/atom:feed/atom:title', namespaces=GmailFilters.namespaces)[0]
+      id = self.tree.xpath('/atom:feed/atom:id', namespaces=GmailFilters.namespaces)[0]
+      updated = self.tree.xpath('/atom:feed/atom:updated', namespaces=GmailFilters.namespaces)[0]
     else:
       self.feed = etree.Element("feed")
       title = etree.SubElement(self.feed, "title")
