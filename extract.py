@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 
-import sys,re,urllib2
-from BeautifulSoup import BeautifulSoup
-from lib import GMailFilter
+import sys
+from lib import GmailFilters
 
 input = open(sys.argv[1])
-soup = BeautifulSoup(input.read())
-filters = GMailFilter.fromSoup(soup)
+print GmailFilters(input.read())

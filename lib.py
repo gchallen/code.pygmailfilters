@@ -1,59 +1,32 @@
-class GMailFilter:
-  import re  
-  matchmatch = re.compile("Matches:.*?<b>(.*?)</b>")
-  actionmatch = re.compile("Do this: (.*)")
+import sys
+from lxml import etree
+from StringIO import StringIO
 
-  # 20 Jul 2011 : GWA : Actions without parameters.
+class GmailFilters:
 
-  archivematch = re.compile("Skip Inbox")
-  deletematch = re.compile("Delete it")
+  # 21 Jul 2011 : GWA : Support loading from a pre-exported filter set or from scratch.
 
-  # 20 Jul 2011 : GWA : Actions with parameters.
+  def __init__(self, string):
+    if string != "":
+      f = StringIO(string)
+      self.tree = etree.parse(f)
+      name = self.feed.xpath("/feed/name")
+      id = self.feed.xpath("/feed/id")
+      updated = self.feed.xpath("/feed/updated")
+    else:
+      self.feed = etree.Element("feed")
+      title = etree.SubElement(self.feed, "title")
+      id = etree.SubElement(self.feed, "id")
+      updated = etree.SubElement(self.feed, "updated")
+      author = etree.SubElement(self.feed, "author")
+      name = etree.SubElement(author, "name")
+      email = etree.SubElement(author, "email")
+      name.text = ""
+      email.text = ""
 
-  forwardmatch = re.compile("Forward to (.*)")
-  labelmatch = re.compile("Apply label \"(.*?)\"")
+    title.text = "Mail Filters"
+    id.text = ""
+    updated.text = ""
 
-  def __init__(self, match, archive, delete, label, forward):
-    self.match = match
-   
-    self.archive = archive
-    self.delete = delete
-
-    self.label = label
-    self.forward = forward
-
-  @classmethod
-  def fromSoup(cls, soup):
-    toreturn = []
-    for i in soup.findAll("div", "begin-container"):
-      toreturn.append(cls.fromString(str(i)))
-    return toreturn
-
-  @classmethod
-  def fromString(cls, string):
-
-      match = None
-      archive = False
-      delete = False
-      label = None
-      forward = None
-
-      m = cls.matchmatch.search(string)
-      if m != None:
-        match = m.group(1)
-
-      m = cls.actionmatch.search(string)
-      if m != None:
-        actions = m.group(1)
-      if cls.archivematch.search(actions) != None:
-        archive = True
-      if cls.deletematch.search(actions) != None:
-        delete = True
-      m = cls.labelmatch.search(actions)
-      if m != None:
-        label = m.group(1)
-      m = cls.forwardmatch.search(actions)
-      if m != None:
-        forward = m.group(1)
-
-      return GMailFilter(match, archive, delete, label, forward)
+  def __repr__(self):
+    return etree.tostring(self.feed, xml_declaration=True, encoding="utf-8", pretty_print=True)
