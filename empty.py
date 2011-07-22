@@ -1,5 +1,5 @@
 #!/usr/bin/env python
 
-from lib import GmailFilters
+import GmailFilters
 
-print GmailFilters("")
+print GmailFilters.GmailFilters("")
