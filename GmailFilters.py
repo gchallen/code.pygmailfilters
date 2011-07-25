@@ -162,3 +162,15 @@ class GmailFilter:
         else:
           return False
       return value
+  
+  def __delattr__(self, name):
+    if name not in self.attributes.keys():
+      del(self.__dict__[name])
+    else:
+      realname = name[0].lower() + name[1:]
+      property = self.entry.xpath('apps:property[@name="{n}"]'.format(n=realname),
+                                  namespaces=namespaces)
+      if len(property) == 0:
+        raise AttributeError
+      elif len(property) == 1:
+        property[0].getparent().remove(property[0])
