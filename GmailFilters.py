@@ -64,9 +64,21 @@ class GmailFilter:
 
   # 22 Jul 2011 : GWA : These seem to be the defined actions at least based on what I can see.
 
-  actions = ["label", "shouldTrash", "shouldNeverMarkAsImportant", "label", "shouldMarkAsRead", "shouldArchive", "forwardTo"]
-
-  searches = ["from", "to", "subject", "hasTheWord"]
+  attributes = {"ShouldTrash" : bool, 
+                "ShouldMarkAsRead" : bool,
+                "ShouldArchive" : bool,
+                "ShouldStar" : bool,
+                "ShouldNeverMarkAsImportant" : bool,
+                "ShouldAlwaysMarkAsImportant" : bool,
+                "ShouldNeverSpam" : bool,
+                "HasAttachment" : bool,
+                "Label" : str,
+                "ForwardTo" : str,
+                "From" : str,
+                "To" : str,
+                "Subject" : str,
+                "HasTheWord" : str,
+                "DoesNotHaveTheWord" : str}
 
   # 22 Jul 2011 : GWA : Support loading from a pre-exported filter or from scratch.
   
@@ -113,3 +125,40 @@ class GmailFilter:
     property.set("name", name)
     property.set("value", value)
     property.text = ""
+  
+  def __setattr__(self, name, value):
+    if name not in self.attributes.keys():
+      self.__dict__[name] = value
+    else:
+      realname = name[0].lower() + name[1:]
+      property = self.entry.xpath('apps:property[@name="{n}"]'.format(n=realname),
+                                  namespaces=namespaces)
+      if len(property) == 0:
+        property = etree.SubElement(self.entry, APPS + "property")
+      elif len(property) == 1:
+        property = property[0]
+      else:
+        raise Exception
+      if self.attributes[name] == bool:
+        if value == True:
+          value = "true"
+        else:
+          value = "false"
+      property.set("value", value)
+  
+  def __getattr__(self, name):
+    if name not in self.attributes.keys():
+      raise AttributeError
+    realname = name[0].lower() + name[1:]
+    property = self.entry.xpath('apps:property[@name="{n}"]'.format(n=realname),
+                                namespaces=namespaces)
+    if len(property) == 0:
+      return None
+    elif len(property) == 1:
+      value = property[0].get("value")
+      if self.attributes[name] == bool:
+        if value == "true":
+          return True
+        else:
+          return False
+      return value
