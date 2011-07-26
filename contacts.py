@@ -12,3 +12,10 @@ client = gdata.contacts.client.ContactsClient()
 client.ClientLogin(username, password, client.source)
 
 feed = client.GetContacts()
+while True:
+  for entry in feed.entry:
+    print entry.title.text
+  uri = feed.GetNextLink()
+  if uri == None:
+    break
+  feed = client.get_feed(uri=uri.href)
