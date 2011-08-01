@@ -11,6 +11,10 @@ password = getpass.getpass("Password: ")
 client = gdata.contacts.client.ContactsClient()
 client.ClientLogin(username, password, client.source)
 
+groups = client.GetGroups()
+while True:
+  for entry in feed.entry:
+
 feed = client.GetContacts()
 while True:
   for entry in feed.entry:
